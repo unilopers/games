@@ -28,7 +28,7 @@ public class EditoraController {
             Editora newEditora = editoraRepository.save(editora);
             return new ResponseEntity<>(newEditora, HttpStatus.CREATED);
         } catch (Exception e) {
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
     }
