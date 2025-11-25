@@ -1,7 +1,7 @@
 package com.Games.LojaGames.controller;
 
-import com.grupo_07.games.model.Editora;
-import com.grupo_07.games.repository.EditoraRepository;
+import com.Games.LojaGames.model.Editora;
+import com.Games.LojaGames.repository.EditoraRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
