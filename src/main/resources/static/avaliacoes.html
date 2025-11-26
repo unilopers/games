@@ -1,10 +1,61 @@
-<!DOCTYPE html>
-<html lang="en">
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+    <title>Minhas Avaliações</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <style type="text/css">
+        body { font-family: sans-serif; padding: 20px; background-color: #f9f9f9; }
+        .review-card { border: 1px solid #ddd; background: #fff; padding: 15px; margin-bottom: 10px; border-radius: 5px; }
+        .rating { color: gold; font-weight: bold; }
+    </style>
 </head>
 <body>
-$END$
+<h1>Avaliar Jogo</h1>
+
+<form action="/avaliacoes" method="post">
+    <div class="form-group">
+        <label for="jogoId">ID do Jogo:</label>
+        <input type="number" id="jogoId" name="jogoId" required="required" />
+    </div>
+
+    <div class="form-group">
+        <label for="nota">Nota (1 a 5):</label>
+        <select id="nota" name="nota">
+            <option value="1">1 - Ruim</option>
+            <option value="2">2 - Regular</option>
+            <option value="3">3 - Bom</option>
+            <option value="4">4 - Muito Bom</option>
+            <option value="5">5 - Excelente</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="comentario">Seu Comentário:</label>
+        <br />
+        <textarea id="comentario" name="comentario" rows="5" cols="50"></textarea>
+    </div>
+
+    <button type="submit">Enviar Avaliação</button>
+</form>
+
+<hr />
+
+<h2>Avaliações Recentes</h2>
+
+<div class="review-card">
+    <p><strong>Usuário 123</strong> avaliou o Jogo X:</p>
+    <p class="rating">★★★★★ (5/5)</p>
+    <p>"O jogo é incrível, gráficos ótimos!"</p>
+    <small><a href="/avaliacoes/delete/50">Remover</a></small>
+</div>
+
+<div class="review-card">
+    <p><strong>Usuário 456</strong> avaliou o Jogo Y:</p>
+    <p class="rating">★★★☆☆ (3/5)</p>
+    <p>"A jogabilidade é meio travada."</p>
+    <small><a href="/avaliacoes/delete/51">Remover</a></small>
+</div>
+
 </body>
 </html>
