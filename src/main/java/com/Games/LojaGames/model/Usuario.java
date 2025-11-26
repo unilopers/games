@@ -2,9 +2,9 @@ package com.Games.LojaGames.model;
 
 import jakarta.persistence.*;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import org.hibernate.annotations.CreationTimestamp; // Importante para a data automática
+import org.hibernate.annotations.CreationTimestamp;
 
-import java.time.LocalDateTime; // Importante para lidar com TIMESTAMP
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -24,7 +24,7 @@ public class Usuario {
     @Column(name = "senha_hash", nullable = false, length = 255)
     private String senha;
 
-    @Column(name = "nome_completo", length = 200) // Ajustei o tamanho conforme imagem (parece ser 200 ou 255)
+    @Column(name = "nome_completo", length = 200)
     private String nomeCompleto;
     @Enumerated(EnumType.STRING)
     @Column(name = "funcao")
@@ -36,8 +36,6 @@ public class Usuario {
 
     @Column(name = "ultimo_login")
     private LocalDateTime ultimoLogin;
-
-    // -------------------------------
 
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL)
     @JsonIgnoreProperties("usuario")
@@ -123,7 +121,8 @@ public class Usuario {
         return avaliacoes;
     }
     
-    public void setAvaliacoes(List<Avaliacao> avaliacoes) {''
+    public void setAvaliacoes(List<Avaliacao> avaliacoes) {
+        ""
         this.avaliacoes = avaliacoes;
     }
 }
