@@ -1,10 +1,287 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+    <meta charset="UTF-8">
+    <title>Gerenciar Jogos (XML)</title>
 </head>
 <body>
-$END$
+
+<div>
+    <nav>
+        <a href="editoras.html">Editoras</a>
+        <a href="jogos.html">Jogos</a>
+    </nav>
+
+    <div>
+        <h2 id="form-titulo">Novo Jogo</h2>
+        <input type="hidden" id="id-jogo">
+        <div>
+            <div>
+                <label>Título</label>
+                <input type="text" id="titulo">
+            </div>
+            <div>
+                <label>Slug</label>
+                <input type="text" id="slug">
+            </div>
+            <div>
+                <label>Preço (R$)</label>
+                <input type="number" step="0.01" id="preco">
+            </div>
+            <div>
+                <label>Editora</label>
+                <select id="select-editora">
+                    <option value="">Selecione...</option>
+                </select>
+            </div>
+            <div>
+                <label>Estoque</label>
+                <input type="number" id="estoque" value="0">
+            </div>
+            <div>
+                <label>Tipo</label>
+                <select id="digital">
+                    <option value="true">Digital</option>
+                    <option value="false">Físico</option>
+                </select>
+            </div>
+            <div>
+                <label>Data de Lançamento</label>
+                <input type="date" id="dataLancamento">
+            </div>
+            <div>
+                <label>URL da Capa</label>
+                <input type="text" id="urlCapa" placeholder="http://...">
+            </div>
+            <div style="grid-column: span 2;">
+                <label>Descrição</label>
+                <textarea id="descricao" rows="3"></textarea>
+            </div>
+        </div>
+        <div>
+            <button id="btn-salvar" onclick="salvarJogo()">Cadastrar Jogo</button>
+            <button id="btn-cancelar" onclick="limparFormulario()">Cancelar</button>
+        </div>
+    </div>
+
+    <div>
+        <h2>Biblioteca</h2>
+        <table>
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Título</th>
+                <th>Data</th>
+                <th>Editora</th>
+                <th>Preço</th>
+                <th>Ações</th>
+            </tr>
+            </thead>
+            <tbody id="tabela-jogos"></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    const API_JOGOS = '/jogos';
+    const API_EDITORAS = '/editoras';
+
+    function getXmlValue(node, tagName) {
+        const tag = node.querySelector(tagName);
+        return tag ? tag.textContent : '';
+    }
+
+    async function carregarOpcoesEditoras() {
+        try {
+            const response = await fetch(API_EDITORAS, { headers: { 'Accept': 'application/xml' } });
+            const text = await response.text();
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(text, "text/xml");
+
+            const editorasNodes = xmlDoc.querySelectorAll("editora, item");
+            const select = document.getElementById('select-editora');
+
+            select.innerHTML = '<option value="">Selecione...</option>';
+            editorasNodes.forEach(node => {
+                const id = getXmlValue(node, 'id');
+                const nome = getXmlValue(node, 'nome');
+                const option = document.createElement('option');
+                option.value = id;
+                option.text = nome;
+                select.appendChild(option);
+            });
+        } catch(e) { console.error("Erro editoras:", e); }
+    }
+
+    async function carregarJogos() {
+        try {
+            const response = await fetch(API_JOGOS, { headers: { 'Accept': 'application/xml' } });
+            const text = await response.text();
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(text, "text/xml");
+
+            const jogosNodes = xmlDoc.querySelectorAll("jogo, item");
+            const tbody = document.getElementById('tabela-jogos');
+            tbody.innerHTML = '';
+
+            jogosNodes.forEach(node => {
+                const id = getXmlValue(node, 'id');
+                const titulo = getXmlValue(node, 'titulo');
+                const slug = getXmlValue(node, 'slug');
+                const preco = getXmlValue(node, 'preco');
+                const qtndEstoque = getXmlValue(node, 'qtndEstoque');
+                const ehDigital = getXmlValue(node, 'ehDigital');
+
+                const descricao = getXmlValue(node, 'descricao');
+                const url = getXmlValue(node, 'url');
+                let dataLancamento = getXmlValue(node, 'dataLancamento');
+
+                if (dataLancamento && !dataLancamento.includes('-')) {
+                    const d = new Date(parseInt(dataLancamento));
+                    if(!isNaN(d.getTime())) dataLancamento = d.toISOString().split('T')[0];
+                } else if (dataLancamento && dataLancamento.includes('T')) {
+                    dataLancamento = dataLancamento.split('T')[0];
+                }
+
+                const editoraNode = node.querySelector('editora');
+                let nomeEditora = 'N/A';
+                let idEditora = '';
+
+                if (editoraNode) {
+                    nomeEditora = getXmlValue(editoraNode, 'nome');
+                    idEditora = getXmlValue(editoraNode, 'id');
+                }
+
+                const jogoObj = {
+                    id, titulo, slug, preco, qtndEstoque, ehDigital,
+                    editoraId: idEditora, descricao, url, dataLancamento
+                };
+
+                const jogoString = JSON.stringify(jogoObj).replace(/"/g, '&quot;');
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${id}</td>
+                        <td>${titulo} <br> <small style="color:#777">${slug}</small></td>
+                        <td>${dataLancamento || '-'}</td>
+                        <td><span class="badge">${nomeEditora}</span></td>
+                        <td>R$ ${preco}</td>
+                        <td>
+                            <button class="btn-edit" onclick="prepararEdicao(${jogoString})">✏️</button>
+                            <button class="btn-delete" onclick="deletarJogo(${id})">🗑️</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        } catch(e) { console.error("Erro jogos:", e); }
+    }
+
+    function prepararEdicao(jogo) {
+        document.getElementById('id-jogo').value = jogo.id;
+        document.getElementById('titulo').value = jogo.titulo;
+        document.getElementById('slug').value = jogo.slug;
+        document.getElementById('preco').value = jogo.preco;
+        document.getElementById('estoque').value = jogo.qtndEstoque || 0;
+        document.getElementById('digital').value = jogo.ehDigital;
+        document.getElementById('select-editora').value = jogo.editoraId;
+
+        document.getElementById('descricao').value = jogo.descricao || '';
+        document.getElementById('urlCapa').value = jogo.url || '';
+        document.getElementById('dataLancamento').value = jogo.dataLancamento || '';
+
+        document.getElementById('form-titulo').innerText = 'Editar Jogo #' + jogo.id;
+        document.getElementById('btn-salvar').innerText = 'Atualizar Jogo';
+        document.getElementById('btn-salvar').style.backgroundColor = '#ffc107';
+        document.getElementById('btn-salvar').style.color = '#333';
+        document.getElementById('btn-cancelar').style.display = 'block';
+    }
+
+    function limparFormulario() {
+        document.getElementById('id-jogo').value = '';
+        document.getElementById('titulo').value = '';
+        document.getElementById('slug').value = '';
+        document.getElementById('preco').value = '';
+        document.getElementById('estoque').value = '0';
+        document.getElementById('select-editora').value = '';
+        document.getElementById('digital').value = 'true';
+
+        document.getElementById('descricao').value = '';
+        document.getElementById('urlCapa').value = '';
+        document.getElementById('dataLancamento').value = '';
+
+        document.getElementById('form-titulo').innerText = 'Novo Jogo';
+        document.getElementById('btn-salvar').innerText = 'Cadastrar Jogo';
+        document.getElementById('btn-salvar').style.backgroundColor = '#6610f2';
+        document.getElementById('btn-salvar').style.color = 'white';
+        document.getElementById('btn-cancelar').style.display = 'none';
+    }
+
+    async function salvarJogo() {
+        const id = document.getElementById('id-jogo').value;
+        const titulo = document.getElementById('titulo').value;
+        const slug = document.getElementById('slug').value;
+        const preco = document.getElementById('preco').value;
+        const estoque = document.getElementById('estoque').value;
+        const digital = document.getElementById('digital').value;
+        const idEditora = document.getElementById('select-editora').value;
+        const descricao = document.getElementById('descricao').value;
+        const urlCapa = document.getElementById('urlCapa').value;
+        const dataLancamento = document.getElementById('dataLancamento').value;
+
+        const xmlBody = `
+            <jogo>
+                ${id ? `<id>${id}</id>` : ''}
+                <titulo>${titulo}</titulo>
+                <slug>${slug}</slug>
+                <preco>${preco}</preco>
+                <qtndEstoque>${estoque}</qtndEstoque>
+                <ehDigital>${digital}</ehDigital>
+                <descricao>${descricao}</descricao>
+                <url>${urlCapa}</url>
+                <dataLancamento>${dataLancamento}</dataLancamento>
+                ${idEditora ? `<editora><id>${idEditora}</id></editora>` : ''}
+            </jogo>
+        `;
+
+        let url = API_JOGOS;
+        let method = 'POST';
+
+        if (id) {
+            url = `${API_JOGOS}/${id}`;
+            method = 'PUT';
+        }
+
+        try {
+            const response = await fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/xml',
+                    'Accept': 'application/xml'
+                },
+                body: xmlBody
+            });
+
+            if (response.ok) {
+                alert(id ? 'Jogo Atualizado!' : 'Jogo Criado!');
+                limparFormulario();
+                carregarJogos();
+            } else {
+                alert('Erro ao salvar. Verifique console.');
+                console.log(await response.text());
+            }
+        } catch (e) { console.error(e); }
+    }
+
+    async function deletarJogo(id) {
+        if(confirm('Apagar?')) {
+            await fetch(`${API_JOGOS}/${id}`, { method: 'DELETE' });
+            carregarJogos();
+        }
+    }
+
+    carregarOpcoesEditoras();
+    carregarJogos();
+</script>
+
 </body>
 </html>
