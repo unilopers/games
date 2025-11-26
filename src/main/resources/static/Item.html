@@ -1,10 +1,195 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+    <meta charset="UTF-8">
+    <title>Itens do Pedido</title>
 </head>
 <body>
-$END$
+
+<div>
+    <nav>
+        <a href="pedidos.html">Pedidos</a>
+        <a href="itens-pedido.html">Itens</a>
+        <a href="lista-desejos.html">Desejos</a>
+        <a href="chaves-digitais.html">Chaves</a>
+    </nav>
+
+    <div>
+        <h2 id="form-titulo">Novo Item</h2>
+        <input type="hidden" id="id-item">
+        <div>
+            <div>
+                <label>ID Pedido</label>
+                <input type="number" id="pedidoId">
+            </div>
+            <div>
+                <label>ID Jogo</label>
+                <input type="number" id="jogoId">
+            </div>
+            <div>
+                <label>Preço Unitário</label>
+                <input type="number" step="0.01" id="preco">
+            </div>
+            <div>
+                <label>Quantidade</label>
+                <input type="number" id="quantidade" value="1">
+            </div>
+            <div>
+                <label>Subtotal</label>
+                <input type="number" step="0.01" id="subtotal">
+            </div>
+        </div>
+        <div>
+            <button id="btn-salvar" onclick="salvarItem()">Salvar Item</button>
+            <button id="btn-cancelar" onclick="limparFormulario()">Cancelar</button>
+        </div>
+    </div>
+
+    <div>
+        <h2>Itens Registrados</h2>
+        <table>
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Pedido</th>
+                <th>Jogo</th>
+                <th>Qtd</th>
+                <th>Subtotal</th>
+                <th>Ações</th>
+            </tr>
+            </thead>
+            <tbody id="tabela-itens"></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    const API_URL = '/itens-pedido';
+
+    function getXmlValue(node, tagName) {
+        const tag = node.querySelector(tagName);
+        return tag ? tag.textContent : '';
+    }
+
+    function getNestedId(node, parentTag) {
+        const parent = node.querySelector(parentTag);
+        return parent ? (getXmlValue(parent, 'id')) : '';
+    }
+
+    async function carregarItens() {
+        try {
+            const res = await fetch(API_URL, { headers: { 'Accept': 'application/xml' } });
+            const text = await res.text();
+            const xmlDoc = new DOMParser().parseFromString(text, "text/xml");
+            const nodes = xmlDoc.querySelectorAll("itemPedido, item");
+
+            const tbody = document.getElementById('tabela-itens');
+            tbody.innerHTML = '';
+
+            nodes.forEach(node => {
+                const id = getXmlValue(node, 'id');
+                const preco = getXmlValue(node, 'precoUnitario');
+                const qtd = getXmlValue(node, 'quantidade');
+                const subtotal = getXmlValue(node, 'subtotal');
+                const pedidoId = getNestedId(node, 'pedido');
+                const jogoId = getNestedId(node, 'jogo');
+
+                const obj = { id, preco, qtd, subtotal, pedidoId, jogoId };
+                const objString = JSON.stringify(obj).replace(/"/g, '&quot;');
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${id}</td>
+                        <td>#${pedidoId}</td>
+                        <td>#${jogoId}</td>
+                        <td>${qtd}</td>
+                        <td>R$ ${subtotal}</td>
+                        <td>
+                            <button class="btn-edit" onclick="prepararEdicao(${objString})">✏️</button>
+                            <button class="btn-delete" onclick="deletarItem(${id})">🗑️</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        } catch(e) { console.error(e); }
+    }
+
+    function prepararEdicao(item) {
+        document.getElementById('id-item').value = item.id;
+        document.getElementById('pedidoId').value = item.pedidoId;
+        document.getElementById('jogoId').value = item.jogoId;
+        document.getElementById('preco').value = item.preco;
+        document.getElementById('quantidade').value = item.qtd;
+        document.getElementById('subtotal').value = item.subtotal;
+
+        document.getElementById('form-titulo').innerText = 'Editar Item #' + item.id;
+        document.getElementById('btn-salvar').innerText = 'Atualizar';
+        document.getElementById('btn-cancelar').style.display = 'block';
+    }
+
+    function limparFormulario() {
+        document.getElementById('id-item').value = '';
+        document.getElementById('pedidoId').value = '';
+        document.getElementById('jogoId').value = '';
+        document.getElementById('preco').value = '';
+        document.getElementById('quantidade').value = '1';
+        document.getElementById('subtotal').value = '';
+
+        document.getElementById('form-titulo').innerText = 'Novo Item';
+        document.getElementById('btn-salvar').innerText = 'Salvar Item';
+        document.getElementById('btn-cancelar').style.display = 'none';
+    }
+
+    async function salvarItem() {
+        const id = document.getElementById('id-item').value;
+        const pedidoId = document.getElementById('pedidoId').value;
+        const jogoId = document.getElementById('jogoId').value;
+        const preco = document.getElementById('preco').value;
+        const qtd = document.getElementById('quantidade').value;
+
+        let subtotal = document.getElementById('subtotal').value;
+        if (!subtotal && preco && qtd) subtotal = (parseFloat(preco) * parseInt(qtd)).toFixed(2);
+
+        const xmlBody = `
+            <itemPedido>
+                ${id ? `<id>${id}</id>` : ''}
+                <precoUnitario>${preco}</precoUnitario>
+                <quantidade>${qtd}</quantidade>
+                <subtotal>${subtotal}</subtotal>
+                ${pedidoId ? `<pedido><id>${pedidoId}</id></pedido>` : ''}
+                ${jogoId ? `<jogo><id>${jogoId}</id></jogo>` : ''}
+            </itemPedido>
+        `;
+
+        let url = API_URL;
+        let method = 'POST';
+        if (id) { url = `${API_URL}/${id}`; method = 'PUT'; }
+
+        try {
+            const res = await fetch(url, {
+                method: method,
+                headers: { 'Content-Type': 'application/xml', 'Accept': 'application/xml' },
+                body: xmlBody
+            });
+            if (res.ok) {
+                alert('Salvo!');
+                limparFormulario();
+                carregarItens();
+            } else {
+                alert('Erro.');
+                console.log(await res.text());
+            }
+        } catch(e) { console.error(e); }
+    }
+
+    async function deletarItem(id) {
+        if(confirm('Apagar?')) {
+            await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+            carregarItens();
+        }
+    }
+
+    carregarItens();
+</script>
 </body>
 </html>

@@ -1,10 +1,184 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+    <meta charset="UTF-8">
+    <title>Chaves Digitais (XML)</title>
 </head>
 <body>
-$END$
+
+<div>
+    <nav>
+        <a href="pedidos.html">Pedidos</a>
+        <a href="itens-pedido.html">Itens</a>
+        <a href="lista-desejos.html">Desejos</a>
+        <a href="chaves-digitais.html">Chaves</a>
+    </nav>
+
+    <div>
+        <h2 id="form-titulo">Nova Chave</h2>
+        <input type="hidden" id="id-chave">
+        <div>
+            <div>
+                <label>ID Jogo</label>
+                <input type="number" id="jogoId">
+            </div>
+            <div>
+                <label>Código da Chave</label>
+                <input type="text" id="codigo" placeholder="XXXX-YYYY-ZZZZ">
+            </div>
+            <div>
+                <label>Já Alocado?</label>
+                <select id="alocado">
+                    <option value="false">Não</option>
+                    <option value="true">Sim</option>
+                </select>
+            </div>
+            <div>
+                <label>ID Item Pedido (Se vendida)</label>
+                <input type="number" id="itemPedidoId">
+            </div>
+        </div>
+        <div>
+            <button id="btn-salvar" onclick="salvarChave()">Salvar Chave</button>
+            <button id="btn-cancelar" onclick="limparFormulario()">Cancelar</button>
+        </div>
+    </div>
+
+    <div>
+        <h2>Chaves em Estoque</h2>
+        <table>
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Jogo</th>
+                <th>Código</th>
+                <th>Alocado</th>
+                <th>Ações</th>
+            </tr>
+            </thead>
+            <tbody id="tabela-chaves"></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    const API_URL = '/chaves-digitais';
+
+    function getXmlValue(node, tagName) {
+        const tag = node.querySelector(tagName);
+        return tag ? tag.textContent : '';
+    }
+
+    function getNestedId(node, parentTag) {
+        const parent = node.querySelector(parentTag);
+        return parent ? (getXmlValue(parent, 'id')) : '';
+    }
+
+    async function carregarChaves() {
+        try {
+            const res = await fetch(API_URL, { headers: { 'Accept': 'application/xml' } });
+            const text = await res.text();
+            const xmlDoc = new DOMParser().parseFromString(text, "text/xml");
+            const nodes = xmlDoc.querySelectorAll("chaveDigital, item");
+
+            const tbody = document.getElementById('tabela-chaves');
+            tbody.innerHTML = '';
+
+            nodes.forEach(node => {
+                const id = getXmlValue(node, 'id');
+                const codigo = getXmlValue(node, 'codigoChave');
+                const alocado = getXmlValue(node, 'alocado');
+                const jogoId = getNestedId(node, 'jogo');
+                const itemPedidoId = getNestedId(node, 'itemPedido');
+
+                const obj = { id, codigo, alocado, jogoId, itemPedidoId };
+                const objString = JSON.stringify(obj).replace(/"/g, '&quot;');
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${id}</td>
+                        <td>#${jogoId}</td>
+                        <td>${codigo}</td>
+                        <td>${alocado === 'true' ? '✅ Sim' : '⬜ Não'}</td>
+                        <td>
+                            <button class="btn-edit" onclick="prepararEdicao(${objString})">✏️</button>
+                            <button class="btn-delete" onclick="deletarChave(${id})">🗑️</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        } catch(e) { console.error(e); }
+    }
+
+    function prepararEdicao(chave) {
+        document.getElementById('id-chave').value = chave.id;
+        document.getElementById('jogoId').value = chave.jogoId;
+        document.getElementById('codigo').value = chave.codigo;
+        document.getElementById('alocado').value = chave.alocado;
+        document.getElementById('itemPedidoId').value = chave.itemPedidoId;
+
+        document.getElementById('form-titulo').innerText = 'Editar Chave #' + chave.id;
+        document.getElementById('btn-salvar').innerText = 'Atualizar';
+        document.getElementById('btn-cancelar').style.display = 'block';
+    }
+
+    function limparFormulario() {
+        document.getElementById('id-chave').value = '';
+        document.getElementById('jogoId').value = '';
+        document.getElementById('codigo').value = '';
+        document.getElementById('alocado').value = 'false';
+        document.getElementById('itemPedidoId').value = '';
+
+        document.getElementById('form-titulo').innerText = 'Nova Chave';
+        document.getElementById('btn-salvar').innerText = 'Salvar Chave';
+        document.getElementById('btn-cancelar').style.display = 'none';
+    }
+
+    async function salvarChave() {
+        const id = document.getElementById('id-chave').value;
+        const jogoId = document.getElementById('jogoId').value;
+        const codigo = document.getElementById('codigo').value;
+        const alocado = document.getElementById('alocado').value;
+        const itemPedidoId = document.getElementById('itemPedidoId').value;
+
+        const xmlBody = `
+            <chaveDigital>
+                ${id ? `<id>${id}</id>` : ''}
+                <codigoChave>${codigo}</codigoChave>
+                <alocado>${alocado}</alocado>
+                ${jogoId ? `<jogo><id>${jogoId}</id></jogo>` : ''}
+                ${itemPedidoId ? `<itemPedido><id>${itemPedidoId}</id></itemPedido>` : ''}
+            </chaveDigital>
+        `;
+
+        let url = API_URL;
+        let method = 'POST';
+        if (id) { url = `${API_URL}/${id}`; method = 'PUT'; }
+
+        try {
+            const res = await fetch(url, {
+                method: method,
+                headers: { 'Content-Type': 'application/xml', 'Accept': 'application/xml' },
+                body: xmlBody
+            });
+            if (res.ok) {
+                alert('Salvo!');
+                limparFormulario();
+                carregarChaves();
+            } else {
+                alert('Erro.');
+            }
+        } catch(e) { console.error(e); }
+    }
+
+    async function deletarChave(id) {
+        if(confirm('Apagar?')) {
+            await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+            carregarChaves();
+        }
+    }
+
+    carregarChaves();
+</script>
 </body>
 </html>
