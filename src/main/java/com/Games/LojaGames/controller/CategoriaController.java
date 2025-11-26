@@ -15,7 +15,8 @@ import java.util.Optional;
 
 @Controller
 @RequestMapping("/categorias")
-public class CategoriaController {
+public class
+CategoriaController {
 
     @Autowired
     private CategoriaRepository categoriaRepository;
