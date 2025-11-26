@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Lista de Categorias</title>
+</head>
+<body>
+
+<h1>Categorias de Jogos</h1>
+
+<table border="1">
+    <tr>
+        <th>ID</th>
+        <th>Nome</th>
+        <th>Descrição</th>
+        <th>Criado Em</th>
+    </tr>
+
+    <tr th:each="categoria : ${categorias}">
+        <td th:text="${categoria.id}"></td>
+        <td th:text="${categoria.nome}"></td>
+        <td th:text="${categoria.descricao}"></td>
+        <td th:text="${#temporals.format(categoria.criadoEm, 'dd/MM/yyyy HH:mm')}"></td>
+    </tr>
+</table>
+
+</body>
+</html>
