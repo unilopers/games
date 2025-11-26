@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Lista de Descontos</title>
+</head>
+<body>
+
+<h1>Cupons de Desconto</h1>
+
+<table border="1">
+    <tr>
+        <th>ID</th>
+        <th>Código</th>
+        <th>Descrição</th>
+        <th>% Desconto</th>
+        <th>Início</th>
+        <th>Fim</th>
+        <th>Criado Em</th>
+    </tr>
+
+    <tr th:each="desconto : ${descontos}">
+        <td th:text="${desconto.id}"></td>
+        <td th:text="${desconto.codigo}"></td>
+        <td th:text="${desconto.descricao}"></td>
+        <td th:text="${desconto.percentualDesconto}"></td>
+        <td th:text="${#temporals.format(desconto.inicioEm, 'dd/MM/yyyy HH:mm')}"></td>
+        <td th:text="${#temporals.format(desconto.fimEm, 'dd/MM/yyyy HH:mm')}"></td>
+        <td th:text="${#temporals.format(desconto.criadoEm, 'dd/MM/yyyy HH:mm')}"></td>
+    </tr>
+</table>
+
+</body>
+</html>
