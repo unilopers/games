@@ -1,10 +1,75 @@
-<!DOCTYPE html>
-<html lang="en">
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+    <title>Gerenciamento de Usuários</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <style type="text/css">
+        body { font-family: sans-serif; padding: 20px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-weight: bold; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+    </style>
 </head>
 <body>
-$END$
+<h1>Cadastro de Usuário</h1>
+
+<form action="/usuarios" method="post">
+    <div class="form-group">
+        <label for="nomeCompleto">Nome Completo:</label>
+        <input type="text" id="nomeCompleto" name="nomeCompleto" required="required" />
+    </div>
+
+    <div class="form-group">
+        <label for="nomeUsuario">Nome de Usuário (Login):</label>
+        <input type="text" id="nomeUsuario" name="nomeUsuario" required="required" />
+    </div>
+
+    <div class="form-group">
+        <label for="email">E-mail:</label>
+        <input type="email" id="email" name="email" required="required" />
+    </div>
+
+    <div class="form-group">
+        <label for="senha">Senha:</label>
+        <input type="password" id="senha" name="senha" required="required" />
+    </div>
+
+    <div class="form-group">
+        <label for="funcao">Função:</label>
+        <select id="funcao" name="funcao">
+            <option value="CLIENTE">Cliente</option>
+            <option value="ADMIN">Administrador</option>
+        </select>
+    </div>
+
+    <button type="submit">Salvar Usuário</button>
+</form>
+
+<hr />
+
+<h2>Lista de Usuários</h2>
+<table>
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Nome Completo</th>
+        <th>E-mail</th>
+        <th>Função</th>
+        <th>Ações</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>1</td>
+        <td>João Silva</td>
+        <td>joao@email.com</td>
+        <td>CLIENTE</td>
+        <td><a href="/usuarios/1">Editar</a> | <a href="/usuarios/delete/1">Excluir</a></td>
+    </tr>
+    </tbody>
+</table>
 </body>
 </html>
