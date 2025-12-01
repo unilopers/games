@@ -29,7 +29,7 @@ public class Usuario {
     private String nomeCompleto;
 
     @Enumerated(EnumType.STRING)
-    @Column(columnDefinition = "ENUM('pendente','pago','processando','enviado','concluido','cancelado','reembolsado')")
+    @Column(columnDefinition = "ENUM('Cliente','Admin', 'Vendedor')")
     private Funcao funcao = Funcao.Cliente;
 
     @CreationTimestamp
