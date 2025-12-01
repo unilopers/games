@@ -1,5 +1,7 @@
 package com.Games.LojaGames.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import com.Games.LojaGames.model.enuns.StatusPedido;
 import jakarta.persistence.*;
@@ -46,6 +48,7 @@ public class Pedido {
     private LocalDateTime atualizadoEm;
 
     @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL)
+    @JsonIgnoreProperties
     private List<ItemPedido> itens;
 
     public Long getId() { return id; }
