@@ -44,3 +44,5 @@ public class AvaliacaoController {
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {
         avaliacaoRepository.deleteById(id);
+    }
+}

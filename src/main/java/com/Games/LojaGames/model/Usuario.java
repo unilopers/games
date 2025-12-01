@@ -1,5 +1,6 @@
 package com.Games.LojaGames.model;
 
+import com.Games.LojaGames.model.enuns.Funcao;
 import jakarta.persistence.*;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.hibernate.annotations.CreationTimestamp;
@@ -26,9 +27,10 @@ public class Usuario {
 
     @Column(name = "nome_completo", length = 200)
     private String nomeCompleto;
+
     @Enumerated(EnumType.STRING)
-    @Column(name = "funcao")
-    private int funcao;
+    @Column(columnDefinition = "ENUM('pendente','pago','processando','enviado','concluido','cancelado','reembolsado')")
+    private Funcao funcao = Funcao.Cliente;
 
     @CreationTimestamp
     @Column(name = "criado_em", updatable = false)
@@ -85,11 +87,11 @@ public class Usuario {
         this.nomeCompleto = nomeCompleto;
     }
 
-    public int getFuncao() {
+    public Funcao getFuncao() {
         return funcao;
     }
 
-    public void setFuncao(int funcao) {
+    public void setFuncao(Funcao funcao) {
         this.funcao = funcao;
     }
 
@@ -122,7 +124,6 @@ public class Usuario {
     }
     
     public void setAvaliacoes(List<Avaliacao> avaliacoes) {
-        ""
         this.avaliacoes = avaliacoes;
     }
 }
