@@ -26,7 +26,7 @@ public class Pedido {
     private Usuario usuario;
 
     @Enumerated(EnumType.STRING)
-    @Column(columnDefinition = "ENUM('pendente','pago','processando','enviado','concluido','cancelado','reembolsado')")
+    @Column(columnDefinition = "ENUM('PENDENTE','PAGO','PROCESSANDO','ENVIADO','CONCLUIDO','CANCELADO','REEMBOLSADO')")
     private StatusPedido status = StatusPedido.PENDENTE;
 
     @Column(name = "valor_total", precision = 12, scale = 2)
@@ -48,7 +48,7 @@ public class Pedido {
     private LocalDateTime atualizadoEm;
 
     @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL)
-    @JsonIgnoreProperties
+    @JsonIgnoreProperties("pedido")
     private List<ItemPedido> itens;
 
     public Long getId() { return id; }

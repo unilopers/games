@@ -1,6 +1,7 @@
 package com.Games.LojaGames.model;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -49,6 +50,7 @@ public class Jogo {
     private LocalDateTime criadoEm;
 
     @OneToMany(mappedBy = "jogo", cascade = CascadeType.ALL)
+    @JsonIgnoreProperties("jogo")
     private List<JogoPlataforma> plataformaDoJogo;
 
     public Long getId() {
