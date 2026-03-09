@@ -30,12 +30,7 @@ public class UsuarioController {
                 .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
-    @PostMapping(consumes = MediaType.APPLICATION_XML_VALUE, produces = MediaType.APPLICATION_XML_VALUE)
-    public ResponseEntity<Usuario> post(@RequestBody Usuario usuario) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(usuariosRepository.save(usuario));
-    }
-
-    @PutMapping( consumes = MediaType.APPLICATION_XML_VALUE, produces = MediaType.APPLICATION_XML_VALUE)
+    @PutMapping(consumes = MediaType.APPLICATION_XML_VALUE, produces = MediaType.APPLICATION_XML_VALUE)
     public ResponseEntity<Usuario> put(@RequestBody Usuario usuario) {
         return usuariosRepository.findById(usuario.getId())
                 .map(resposta -> ResponseEntity.status(HttpStatus.OK).body(usuariosRepository.save(usuario)))
