@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Gerenciar Plataformas (XML)</title>
+</head>
+<body>
+
+<div >
+    <nav>
+        <a href="plataformas.html">Plataformas</a>
+        <a href="editoras.html">Editoras</a>
+        <a href="jogos.html">Jogos</a>
+    </nav>
+
+
+    <div >
+        <h2 id="form-titulo">Nova Plataforma</h2>
+        <input type="hidden" id="id-plataforma">
+
+        <div>
+            <label>Nome</label>
+            <input type="text" id="nome" placeholder="Ex: PlayStation 5">
+        </div>
+        <div >
+            <label>Fabricante</label>
+            <input type="text" id="fabricante" placeholder="Ex: Sony">
+        </div>
+
+        <div>
+            <button id="btn-salvar" onclick="salvarPlataforma()">Cadastrar</button>
+            <button id="btn-cancelar" onclick="limparFormulario()">Cancelar</button>
+        </div>
+    </div>
+
+    <div>
+        <h2>Plataformas Cadastradas</h2>
+        <table>
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>Fabricante</th>
+                <th>Ações</th>
+            </tr>
+            </thead>
+            <tbody id="tabela-corpo"></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    const API_URL = '/plataformas';
+
+    function getXmlValue(node, tagName) {
+        const tag = node.querySelector(tagName);
+        return tag ? tag.textContent : '';
+    }
+
+    async function carregarPlataformas() {
+        console.log("Iniciando carregamento XML...");
+
+        try {
+            const resposta = await fetch(API_URL, {
+                headers: { 'Accept': 'application/xml' }
+            });
+
+
+            const textData = await resposta.text();
+
+            console.log("Dados recebidos (XML):", textData);
+
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(textData, "text/xml");
+
+            const plataformasNodes = xmlDoc.querySelectorAll("plataforma, item, Plataforma");
+
+            const tbody = document.getElementById('tabela-corpo');
+            tbody.innerHTML = '';
+
+            if (plataformasNodes.length === 0) {
+                console.warn("XML vazio ou tags não encontradas. XML Bruto:", textData);
+            }
+
+            plataformasNodes.forEach(node => {
+                const id = getXmlValue(node, 'id');
+                const nome = getXmlValue(node, 'nome');
+                const fabricante = getXmlValue(node, 'fabricante');
+
+                const obj = { id, nome, fabricante };
+                const objString = JSON.stringify(obj).replace(/"/g, '&quot;');
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${id}</td>
+                        <td>${nome}</td>
+                        <td>${fabricante}</td>
+                        <td>
+                            <button class="btn-edit" onclick="prepararEdicao(${objString})">✏️</button>
+                            <button class="btn-delete" onclick="deletarPlataforma(${id})">🗑️</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        } catch (e) {
+            console.error("ERRO NO CARREGAMENTO:", e);
+            alert("Erro ao processar XML. Verifique o console.");
+        }
+    }
+
+    function prepararEdicao(plataforma) {
+        document.getElementById('id-plataforma').value = plataforma.id;
+        document.getElementById('nome').value = plataforma.nome;
+        document.getElementById('fabricante').value = plataforma.fabricante;
+
+        document.getElementById('form-titulo').innerText = 'Editar Plataforma #' + plataforma.id;
+        document.getElementById('btn-salvar').innerText = 'Atualizar';
+        document.getElementById('btn-salvar').style.backgroundColor = '#ffc107';
+        document.getElementById('btn-salvar').style.color = '#333';
+        document.getElementById('btn-cancelar').style.display = 'block';
+    }
+
+    function limparFormulario() {
+        document.getElementById('id-plataforma').value = '';
+        document.getElementById('nome').value = '';
+        document.getElementById('fabricante').value = '';
+
+        document.getElementById('form-titulo').innerText = 'Nova Plataforma';
+        document.getElementById('btn-salvar').innerText = 'Cadastrar';
+        document.getElementById('btn-salvar').style.backgroundColor = '#28a745';
+        document.getElementById('btn-salvar').style.color = 'white';
+        document.getElementById('btn-cancelar').style.display = 'none';
+    }
+
+    async function salvarPlataforma() {
+        const id = document.getElementById('id-plataforma').value;
+        const nome = document.getElementById('nome').value;
+        const fabricante = document.getElementById('fabricante').value;
+
+        const xmlBody = `
+            <plataforma>
+                ${id ? `<id>${id}</id>` : ''}
+                <nome>${nome}</nome>
+                <fabricante>${fabricante}</fabricante>
+            </plataforma>
+        `;
+
+        let url = API_URL;
+        let method = 'POST';
+
+        if (id) {
+            url = `${API_URL}/${id}`;
+            method = 'PUT';
+        }
+
+        try {
+            const resposta = await fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/xml',
+                    'Accept': 'application/xml'
+                },
+                body: xmlBody
+            });
+
+            if (resposta.ok) {
+                alert(id ? 'Plataforma Atualizada!' : 'Plataforma Salva!');
+                limparFormulario();
+                carregarPlataformas();
+            } else {
+                const erroTexto = await resposta.text();
+                alert('Erro ao salvar.');
+                console.log(erroTexto);
+            }
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    async function deletarPlataforma(id) {
+        if(confirm('Tem certeza que quer apagar?')) {
+            await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+            carregarPlataformas();
+        }
+    }
+
+    carregarPlataformas();
+</script>
+</body>
+</html>
