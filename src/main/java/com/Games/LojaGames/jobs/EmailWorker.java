@@ -2,7 +2,7 @@ package com.Games.LojaGames.jobs;
 
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
-
+//comentario para fazer pull request
 @Component
 public class EmailWorker {
 

@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
-
+//comentario para fazer pull request
 @Entity
 @Table(name = "plataformas")
 @JacksonXmlRootElement(localName = "plataforma")

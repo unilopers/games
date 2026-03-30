@@ -8,7 +8,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.Games.LojaGames.jobs.EmailWorker;
-
+//comentario para fazer pull request
 import java.util.List;
 import java.util.Optional;
 
