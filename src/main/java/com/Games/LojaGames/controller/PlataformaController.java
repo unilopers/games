@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.Games.LojaGames.jobs.EmailWorker;
 
 import java.util.List;
 import java.util.Optional;
@@ -17,6 +18,9 @@ public class PlataformaController {
 
     @Autowired
     PlataformaRepository plataformaRepository;
+
+    @Autowired
+private EmailWorker emailWorker;
 
     @GetMapping(produces = MediaType.APPLICATION_XML_VALUE)
     public List<Plataforma> readAll(){
@@ -43,6 +47,7 @@ public class PlataformaController {
         }
 
         Plataforma newPlataforma = this.plataformaRepository.save(plataforma);
+        emailWorker.enviarEmailBoasVindas("contato@fabricante.com", newPlataforma.getFabricante());
         return ResponseEntity.status(HttpStatus.CREATED).body(newPlataforma);
     }
 
@@ -74,4 +79,5 @@ public class PlataformaController {
         }
         return ResponseEntity.notFound().build();
     }
+ 
 }
