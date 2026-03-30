@@ -8,6 +8,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.Games.LojaGames.worker.EditoraValidationWorker;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -17,20 +19,23 @@ public class EditoraController {
     @Autowired
     EditoraRepository editoraRepository;
 
+    @Autowired
+    EditoraValidationWorker validationWorker;
 
     @PostMapping(
             consumes = MediaType.APPLICATION_XML_VALUE,
             produces = MediaType.APPLICATION_XML_VALUE
     )
     public ResponseEntity<Editora> create(@RequestBody Editora editora){
-
         try {
             Editora newEditora = editoraRepository.save(editora);
+            
+            validationWorker.validarSite(newEditora.getId(), newEditora.getSite());
+            
             return new ResponseEntity<>(newEditora, HttpStatus.CREATED);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
     }
 
     @GetMapping( produces = MediaType.APPLICATION_XML_VALUE)
@@ -72,4 +77,3 @@ public class EditoraController {
     }
 
 }
-

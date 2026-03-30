@@ -21,6 +21,9 @@ public class Editora {
     private String site;
     private String pais;
 
+    @Column(name = "site_validado")
+    private Boolean siteValidado = false;
+
     @CreationTimestamp
     private LocalDateTime criadoEm;
 
@@ -74,4 +77,13 @@ public class Editora {
     public void setCriadoEm(LocalDateTime criadoEm) {
         this.criadoEm = criadoEm;
     }
+
+    public Boolean getSiteValidado() {
+        return siteValidado;
+    }
+
+    public void setSiteValidado(Boolean siteValidado) {
+        this.siteValidado = siteValidado;
+    }
+
 }
