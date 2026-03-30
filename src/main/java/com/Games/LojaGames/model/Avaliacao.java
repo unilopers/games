@@ -10,6 +10,12 @@ import java.time.LocalDateTime;
 @Table(name = "avaliacoes")
 public class Avaliacao {
 
+    public enum StatusAvaliacao {
+        PENDENTE,
+        APROVADO,
+        REJEITADO
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -34,6 +40,9 @@ public class Avaliacao {
     @CreationTimestamp
     private LocalDateTime criadoEm;
 
+    @Enumerated(EnumType.STRING)
+    private StatusAvaliacao status;
+
     // Getters e Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -55,4 +64,7 @@ public class Avaliacao {
 
     public LocalDateTime getCriadoEm() { return criadoEm; }
     public void setCriadoEm(LocalDateTime criadoEm) { this.criadoEm = criadoEm; }
+
+    public StatusAvaliacao getStatus() { return status; }
+    public void setStatus(StatusAvaliacao status) { this.status = status; }
 }
