@@ -30,7 +30,7 @@ public class AvaliacaoController {
     }
 
     @GetMapping(value = "/{id}", consumes = MediaType.APPLICATION_XML_VALUE, produces = MediaType.APPLICATION_XML_VALUE)
-    public ResponseEntity<AvaliacaoRespostaDTO> getById(@PathVariable Long id) {
+    public ResponseEntity<AvaliacaoRespostaDTO> getById(@PathVariable long id) {
         return avaliacaoRepository.findById(id)
                 .map(resposta -> ResponseEntity.ok(new AvaliacaoRespostaDTO(resposta)))
                 .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
@@ -45,13 +45,18 @@ public class AvaliacaoController {
 
     @PutMapping(consumes = MediaType.APPLICATION_XML_VALUE, produces = MediaType.APPLICATION_XML_VALUE)
     public ResponseEntity<AvaliacaoRespostaDTO> put(@RequestBody Avaliacao avaliacao) {
-        return avaliacaoRepository.findById(avaliacao.getId())
-                .map(resposta -> ResponseEntity.status(HttpStatus.OK).body(new AvaliacaoRespostaDTO(avaliacaoRepository.save(avaliacao))))
+        Long id = avaliacao.getId();
+        if (id == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+        return avaliacaoRepository.findById(id)
+                .map(resposta -> ResponseEntity.status(HttpStatus.OK)
+                        .body(new AvaliacaoRespostaDTO(avaliacaoRepository.save(avaliacao))))
                 .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id) {
+    public void delete(@PathVariable long id) {
         avaliacaoRepository.deleteById(id);
     }
 

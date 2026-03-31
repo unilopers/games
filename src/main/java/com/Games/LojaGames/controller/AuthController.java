@@ -35,7 +35,7 @@ public class AuthController {
     private JWTUtil jwtUtil;
 
     @PostMapping("/login")
-    public ResponseEntity login(@RequestBody UsuarioLoginDTO data) {
+    public ResponseEntity<?> login(@RequestBody UsuarioLoginDTO data) {
 
         var usernamePassword =
                 new UsernamePasswordAuthenticationToken(
@@ -58,7 +58,7 @@ public class AuthController {
     }
 
     @PostMapping("/registrar")
-    public ResponseEntity registrar(@RequestBody UsuarioRegistroDTO data) {
+    public ResponseEntity<?> registrar(@RequestBody UsuarioRegistroDTO data) {
 
         if (data.nomeUsuario() == null) {
             return ResponseEntity.badRequest().build();
